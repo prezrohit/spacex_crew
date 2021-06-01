@@ -2,4 +2,5 @@
     <string name="app_name">SpaceX Crew</string>
     <string name="string_refresh">Refresh</string>
     <string name="string_delete">Delete</string>
+    <string name="string_wikipedia"><u>wikipedia ↗</u></string>
 </resources>
