@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
-
 	private void loadFromWebService() {
 		progressDialog.show();
 		WebService webService = WebServiceClient.getRetrofit().create(WebService.class);
