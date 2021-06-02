@@ -1,6 +1,8 @@
 package com.prezrohit.spacexcrew.ui;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +41,11 @@ public class CrewAdapter extends RecyclerView.Adapter<CrewViewHolder> {
 		holder.textViewAgency.setText(crew.getAgency());
 		holder.textViewStatus.setText(crew.getStatus());
 		Glide.with(context).load(crew.getImage()).diskCacheStrategy(DiskCacheStrategy.DATA).into(holder.image);
+
+		holder.itemView.setOnClickListener(v -> {
+			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(crew.getWikipedia()));
+			context.startActivity(browserIntent);
+		});
 	}
 
 	@Override

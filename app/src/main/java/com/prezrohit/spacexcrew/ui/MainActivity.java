@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -54,11 +55,6 @@ public class MainActivity extends AppCompatActivity {
 		binding.rvCrewMembers.setHasFixedSize(true);
 
 		repository = new CrewRepository(this);
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
 
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -71,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
+
 	private void loadFromWebService() {
 		progressDialog.show();
 		WebService webService = WebServiceClient.getRetrofit().create(WebService.class);
@@ -78,15 +75,23 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onResponse(@NonNull Call<List<CrewResponse>> call, @NonNull Response<List<CrewResponse>> response) {
 				progressDialog.dismiss();
+				if (response.body() == null || response.body().isEmpty()) {
+					binding.rvCrewMembers.setVisibility(View.GONE);
+					binding.errorMessage.setVisibility(View.VISIBLE);
+					return;
+				}
+
+				binding.rvCrewMembers.setVisibility(View.VISIBLE);
+				binding.errorMessage.setVisibility(View.GONE);
+
 				CrewAdapter adapter = new CrewAdapter(getApplicationContext(), response.body());
 				binding.rvCrewMembers.setAdapter(adapter);
 
-				if (response.body() != null) {
-					List<CrewEntity> entityList = new ArrayList<>();
-					for (CrewResponse crewResponse : response.body())
-						entityList.add(CrewEntity.fromCrewResponse(crewResponse));
-					repository.saveCrewData(entityList);
-				}
+				List<CrewEntity> entityList = new ArrayList<>();
+				for (CrewResponse crewResponse : response.body())
+					entityList.add(CrewEntity.fromCrewResponse(crewResponse));
+				repository.saveCrewData(entityList);
+
 			}
 
 			@Override
@@ -94,20 +99,25 @@ public class MainActivity extends AppCompatActivity {
 				progressDialog.dismiss();
 				Log.d(TAG, "onFailure: " + t.getLocalizedMessage());
 				Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-				Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
 
 	private void loadFromLocalDb() {
 		List<CrewEntity> savedCrewList = repository.getSavedCrewList();
-		if (savedCrewList != null) {
-			List<CrewResponse> crewList = new ArrayList<>();
-			for (CrewEntity entity : savedCrewList)
-				crewList.add(CrewResponse.fromCrewEntity(entity));
-
-			binding.rvCrewMembers.setAdapter(new CrewAdapter(this, crewList));
+		if (savedCrewList == null || savedCrewList.isEmpty()) {
+			binding.errorMessage.setVisibility(View.VISIBLE);
+			binding.rvCrewMembers.setVisibility(View.GONE);
+			return;
 		}
+
+		binding.rvCrewMembers.setVisibility(View.VISIBLE);
+		binding.errorMessage.setVisibility(View.GONE);
+		List<CrewResponse> crewList = new ArrayList<>();
+		for (CrewEntity entity : savedCrewList)
+			crewList.add(CrewResponse.fromCrewEntity(entity));
+
+		binding.rvCrewMembers.setAdapter(new CrewAdapter(this, crewList));
 	}
 
 	@Override
