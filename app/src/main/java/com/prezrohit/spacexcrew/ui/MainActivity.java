@@ -1,5 +1,6 @@
 package com.prezrohit.spacexcrew.ui;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -25,20 +26,37 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+	private ProgressDialog progressDialog;
+	private ActivityMainBinding binding;
 	private static final String TAG = "MainActivity";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+		binding = ActivityMainBinding.inflate(getLayoutInflater());
 		setContentView(binding.getRoot());
 
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setTitle("Loading...");
+		progressDialog.setMessage("Please Wait");
+		progressDialog.setCancelable(false);
+		progressDialog.setCanceledOnTouchOutside(false);
+		progressDialog.show();
+
 		binding.rvCrewMembers.setLayoutManager(new GridLayoutManager(this, 2));
+		binding.rvCrewMembers.setHasFixedSize(true);
+		binding.rvCrewMembers.setAdapter(null);
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
 
 		WebService webService = WebServiceClient.getRetrofit().create(WebService.class);
 		webService.getCrewMembers().enqueue(new Callback<List<CrewResponse>>() {
 			@Override
 			public void onResponse(@NonNull Call<List<CrewResponse>> call, @NonNull Response<List<CrewResponse>> response) {
+				progressDialog.dismiss();
 				Log.d(TAG, "onResponse: " + response.body());
 				CrewAdapter adapter = new CrewAdapter(getApplicationContext(), response.body());
 				binding.rvCrewMembers.setAdapter(adapter);
@@ -46,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
 			@Override
 			public void onFailure(@NonNull Call<List<CrewResponse>> call, @NonNull Throwable t) {
+				progressDialog.dismiss();
 				Log.d(TAG, "onFailure: " + t.getLocalizedMessage());
 				Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 			}
