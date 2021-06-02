@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.prezrohit.spacexcrew.R;
 import com.prezrohit.spacexcrew.webservice.CrewResponse;
 
@@ -37,7 +38,7 @@ public class CrewAdapter extends RecyclerView.Adapter<CrewViewHolder> {
 		holder.textViewName.setText(crew.getName());
 		holder.textViewAgency.setText(crew.getAgency());
 		holder.textViewStatus.setText(crew.getStatus());
-		Glide.with(context).load(crew.getImage()).into(holder.image);
+		Glide.with(context).load(crew.getImage()).diskCacheStrategy(DiskCacheStrategy.DATA).into(holder.image);
 	}
 
 	@Override

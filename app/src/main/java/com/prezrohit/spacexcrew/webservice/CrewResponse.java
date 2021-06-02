@@ -2,6 +2,8 @@ package com.prezrohit.spacexcrew.webservice;
 
 import androidx.annotation.NonNull;
 
+import com.prezrohit.spacexcrew.db.CrewEntity;
+
 import java.util.List;
 
 public class CrewResponse {
@@ -14,6 +16,15 @@ public class CrewResponse {
 	private List<String> launches;
 
 	public CrewResponse() {
+	}
+
+	public static CrewResponse fromCrewEntity(CrewEntity crewEntity) {
+		CrewResponse crewResponse = new CrewResponse();
+		crewResponse.name = crewEntity.getName();
+		crewResponse.agency = crewEntity.getAgency();
+		crewResponse.image = crewEntity.getImage();
+		crewResponse.status = crewEntity.getStatus();
+		return crewResponse;
 	}
 
 	public String getId() {
